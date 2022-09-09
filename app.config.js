@@ -2,11 +2,11 @@ import 'dotenv/config';
 
 export default {
   expo: {
-    name: 'RNFirebaseChat',
-    slug: 'RNFirebaseChat',
+    name: 'Phoning',
+    slug: 'Phoning',
     version: '1.0.0',
     orientation: 'portrait',
-    icon: './assets/icon.svg',
+    icon: './assets/icon.png',
     splash: {
       image: './assets/splash.png',
       resizeMode: 'contain',

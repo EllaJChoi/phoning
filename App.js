@@ -6,7 +6,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 
 import { auth } from './config/firebase';
 
-import LoginSignup from './screens/LoginSignup';
+// import LoginSignup from './screens/LoginSignup';
 import Login from './screens/Login';
 import Signup from './screens/Signup';
 import Chat from './screens/Chat';
@@ -24,7 +24,7 @@ function ChatStack() {
 function AuthStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name='LoginSignup' component={LoginSignup} />
+      {/* <Stack.Screen name='LoginSignup' component={LoginSignup} /> */}
       <Stack.Screen name='Login' component={Login} />
       <Stack.Screen name='Signup' component={Signup} />
     </Stack.Navigator>
