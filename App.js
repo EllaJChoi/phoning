@@ -1,85 +1,153 @@
-import React, { useState, createContext, useContext, useEffect } from 'react';
+
+import React, { useState, useEffect } from 'react';
+import { useAssets } from "expo-asset";
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { View, ActivityIndicator } from 'react-native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { StyleSheet, Text, View, Image, LogBox, ImageBackground } from 'react-native';
+import ContextWrapper from "./context/ContextWrapper";
 import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from './firebase';
 
-import { auth } from './config/firebase';
+LogBox.ignoreLogs([
+  "Setting a timer",
+  "AsyncStorage has been extracted from react-native core and will be removed in a future release.",
+]);
 
-// import LoginSignup from './screens/LoginSignup';
 import Login from './screens/Login';
-import Signup from './screens/Signup';
+import Profile from './screens/Profile';
+import Messages from './screens/Messages';
+import Friends from './screens/Friends';
+import Calls from './screens/Calls';
+import Settings from './screens/Settings';
 import Chat from './screens/Chat';
 
+import {decode, encode} from 'base-64'
+
+if (!global.btoa) {  global.btoa = encode }
+if (!global.atob) { global.atob = decode }
+
 const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
 
-function ChatStack() {
-  return (
-    <Stack.Navigator>
-      <Stack.Screen name='Chat' component={Chat} />
-    </Stack.Navigator>
-  );
-}
-
-function AuthStack() {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {/* <Stack.Screen name='LoginSignup' component={LoginSignup} /> */}
-      <Stack.Screen name='Login' component={Login} />
-      <Stack.Screen name='Signup' component={Signup} />
-    </Stack.Navigator>
-  );
-}
-
-const AuthenticatedUserContext = createContext({});
-
-const AuthenticatedUserProvider = ({ children }) => {
+function App() {
   const [user, setUser] = useState(null);
-
-  return (
-    <AuthenticatedUserContext.Provider value={{ user, setUser }}>
-      {children}
-    </AuthenticatedUserContext.Provider>
-  );
-};
-
-function RootNavigator() {
-  const { user, setUser } = useContext(AuthenticatedUserContext);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // onAuthStateChanged returns an unsubscriber
-    const unsubscribeAuth = onAuthStateChanged(
-      auth,
-      async authenticatedUser => {
-        authenticatedUser ? setUser(authenticatedUser) : setUser(null);
-        setIsLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsLoading(false);
+      if (user) {
+        setUser(user);
       }
-    );
-
-    // unsubscribe auth listener on unmount
-    return unsubscribeAuth;
-  }, [user]);
+    });
+    return () => unsubscribe();
+  }, []);
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size='large' />
+      <ContextWrapper>
+      <View style={styles.container}>
+        <Image style={styles.loading} source={require("./assets/loading_status_loading.png")} />
+        {/* progress bar */}
       </View>
+      </ContextWrapper>
     );
   }
 
   return (
+    <ContextWrapper>
     <NavigationContainer>
-      {user ? <ChatStack /> : <AuthStack />}
+      {!user ? (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name='Login' component={Login} />
+        </Stack.Navigator>
+      ) : (
+        <Stack.Navigator
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: 'green',
+            shadowOpacity: 0,
+            elevation: 0,
+          },
+          headerTintColor: 'white',
+        }}>
+          {!user.displayName && (
+            <Stack.Screen name="profile" component={Profile} options={{ headerShown: false }}
+            />
+          )}
+          <Stack.Screen name="home" component={Home} options={{ headerShown: false, gestureEnabled: false }} />
+          <Stack.Screen name="chat" component={Chat} options={{ headerShown: false }} />
+        </Stack.Navigator>
+      )
+      }
     </NavigationContainer>
+    </ContextWrapper>
   );
 }
 
-export default function App() {
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loading: {
+    width: '30%',
+    height: undefined,
+    aspectRatio: 243/65,
+    alignSelf: 'center',
+    // marginTop: 4
+  },
+});
+
+function Home() {
   return (
-    <AuthenticatedUserProvider>
-      <RootNavigator />
-    </AuthenticatedUserProvider>
+    <Tab.Navigator screenOptions={{ headerShown: false, tabBarStyle: {display: 'none'} }}>
+
+    <Tab.Screen name="friends" component={Friends}
+      // options={{ tabBarIcon: ({}) => (
+      //   <Image style={{height: '180%', width: undefined, aspectRatio: 173/218}} source={require("./assets/friends.png")} />
+      // ),}}
+      />
+    <Tab.Screen name="messages" component={Messages}
+      // options={{ tabBarIcon: ({}) => (
+      //   <Image style={{height: '180%', width: undefined, aspectRatio: 173/219}} source={require("./assets/messages.png")} />
+      // ),}}
+    />
+    <Tab.Screen name="calls" component={Calls}
+      // options={{ tabBarIcon: ({}) => (
+      //   <Image style={{height: '180%', width: undefined, aspectRatio: 174/219}} source={require("./assets/calls.png")} />
+      // ),}}
+    />
+    <Tab.Screen name="settings" component={Settings}
+      // options={{ tabBarIcon: ({}) => (
+      //   <Image style={{height: '180%', width: undefined, aspectRatio: 173/219}} source={require("./assets/settings.png")} />
+      // ),}}
+    />
+  </Tab.Navigator>
   );
 }
+
+function Main() {
+  const [assets] = useAssets(
+    require("./assets/camera.png"),
+    require("./assets/loading_status_loading.png"),
+    require("./assets/nj-bunny.png"),
+    require("./assets/friends.png"),
+    require("./assets/messages.png"),
+    require("./assets/calls.png"),
+    require("./assets/settings.png"),
+  );
+  if (!assets) {
+    return <Text>Loading...</Text>;
+  }
+  return (
+    <ContextWrapper>
+      <App />
+    </ContextWrapper>
+  );
+}
+
+export default Main;

@@ -4,41 +4,39 @@ import {
   StyleSheet,
   Text,
   View,
-  Button,
   TouchableHighlight,
   TouchableOpacity,
   TextInput,
 } from "react-native";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { LinearGradient } from "expo-linear-gradient";
+import { signUp, logIn } from "../firebase";
 
-import { auth } from "../config/firebase";
-
-export default function Login({ navigation }) {
+export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [mode, setMode] = useState("signUp");
 
-  const onHandleLogin = () => {
-    if (email !== "" && password !== "") {
-      signInWithEmailAndPassword(auth, email, password)
-        .then(() => console.log("Login success"))
-        .catch((err) => console.log(`Login err: ${err}`));
+  async function handlePress() {
+    if (email !== '' && password !== '') {
+      if (mode === "signUp") {
+        signUp(email, password);
+      }
+      if (mode === "logIn") {
+        logIn(email, password);
+      }
     }
-  };
+  }
 
   return (
     <View style={styles.container}>
-      <ImageBackground
-        source={require("../assets/background-blue.png")}
-        resizeMode="cover"
-        style={styles.backgroundImage}
-      >
+      <LinearGradient style={styles.container} locations={[0, 0.1, 0.4, 0.94, 0.97, 1]}
+    colors={['#3077fc', '#98bbfe', 'white', 'white', '#98bbfe', '#3077fc']}>
         <Text style={styles.title}>
-          Log in to continue
+          Welcome 👋
         </Text>
         <TextInput
           style={styles.input}
-          placeholder="your@email.com"
+          placeholder="email"
           autoCapitalize="none"
           keyboardType="email-address"
           textContentType="emailAddress"
@@ -48,7 +46,7 @@ export default function Login({ navigation }) {
         />
         <TextInput
           style={styles.input}
-          placeholder="**********"
+          placeholder="password"
           autoCapitalize="none"
           autoCorrect={false}
           secureTextEntry={true}
@@ -58,24 +56,24 @@ export default function Login({ navigation }) {
         />
         <TouchableHighlight
           underlayColor="none"
-          onPress={onHandleLogin}
+          onPress={handlePress}
         >
           <LinearGradient
             style={styles.button}
-            locations={[0.3, 0, 0]}
-            colors={["#92e141", "white", "white"]}
+            locations={[0, 0.3]}
+            colors={["white", "#92e141"]}
           >
-            <Text style={[styles.buttonText]}>Log in</Text>
+            <Text style={styles.buttonText}>{mode === 'logIn' ? 'Log in' : 'Sign up'}</Text>
           </LinearGradient>
           </TouchableHighlight>
         
-        <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
+        <TouchableOpacity onPress={() => mode === 'signUp' ? setMode("logIn") : setMode("signUp")}>
           <Text style={styles.accountText}>
-            {"Don't have an account? "}
-            <Text style={styles.signupText}>{'Sign up'}</Text>
+          {mode === 'logIn' ? 'New to Phoning? ' : 'Already have an account? '}
+            <Text style={styles.signupText}>{mode === 'logIn' ? 'Sign up' : 'Log in'}</Text>
           </Text>
         </TouchableOpacity>
-      </ImageBackground>
+      </LinearGradient>
     </View>
   );
 }
@@ -125,13 +123,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   signupText: {
-    marginTop: 50,
+    marginTop: 40,
     fontSize: 16,
     alignSelf: "center",
     color: '#004af7'
   },
   accountText: {
-    marginTop: 50,
+    marginTop: 40,
     fontSize: 16,
     alignSelf: "center",
     color: '#000'
