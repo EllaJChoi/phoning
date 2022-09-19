@@ -4,8 +4,10 @@ import { View, Text, TouchableOpacity, Image,StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import GlobalContext from "../context/Context";
 import { Grid, Row, Col } from "react-native-easy-grid";
-import Avatar from "./Avatar";
+import Avatar from "./Avatar"
 import Modal from "react-native-modal";
+import { auth } from "../firebase";
+import {Button} from 'react-native-elements';
 
 export default function ListItem({
   type,
@@ -16,6 +18,7 @@ export default function ListItem({
   room,
   image,
 }) {
+  const { currentUser } = auth;
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const showModal = () => {
@@ -27,13 +30,12 @@ export default function ListItem({
 
   return (
     <View>
-      <Text>{JSON.stringify(user)}</Text>
-      {user.userDoc && (
+      {/* <Text>{JSON.stringify(user)}</Text> */}
     <TouchableOpacity
       style={{ height: 70, ...style }}
       onPress={() =>
-        type === "contacts"
-          ? showModal()
+        type === "friends" ? showModal()
+          : type === "settings" ? {}
           : navigation.navigate("chat", { user, room, image })
       }
     >
@@ -41,15 +43,15 @@ export default function ListItem({
         <Col
           style={{ width: 70, alignItems: "center", justifyContent: "center" }}
         >
-          <Avatar user={user} size={type === "contacts" ? 55 : 65} />
+          <Avatar user={user} size={55} />
         </Col>
-        <Col style={{ borderBottomWidth: 1, borderBottomColor: "#a9a9a966" }}>
+        <Col style={{ borderBottomWidth: type === "friends" ? 1 : 0, borderBottomColor: "#a9a9a966" }}>
           <Row style={{ marginLeft: 10, marginTop: 10 }}>
             <Col>
               <Text
                 style={{ fontWeight: "bold", fontSize: 16, color: "black" }}
               >
-                { user.contactName || user.userDoc && user.userDoc.displayName }
+                { user.displayName || user.contactName || user.userDoc && user.userDoc.displayName }
               </Text>
             </Col>
             {time && (
@@ -65,13 +67,17 @@ export default function ListItem({
               <Text style={{ color: "gray", fontSize: 13 }}>{description}</Text>
             </Row>
           )}
+          {type === "settings" && (
+            <Row style={{ marginTop: -20 }}>
+            <Button titleStyle={{fontSize: 14, color: 'blue'}} buttonStyle={{backgroundColor: 'transparent', justifyContent: 'flex-start' }} title="Edit Profile" onPress={() => navigation.navigate("profile", { type })} />
+            </Row>
+          )}
         </Col>
       </Grid>
     </TouchableOpacity>
-      )}
     <Modal animationIn={'fadeIn'} animationOut={'fadeOut'} backdropOpacity={0.5} isVisible={modalVisible} onBackdropPress={() => hideModal()}>
         <View style={{width: '85%', borderRadius: 20, alignSelf: 'center', backgroundColor: 'white'}}>
-        <Image style={{borderTopLeftRadius: 20, borderTopRightRadius: 20, height: undefined, width: '100%', aspectRatio: 1/1}} source={ user.photoURL ? { uri: user.photoURL } : require("../assets/nj-bunny.png")} />
+        <Image style={{borderTopLeftRadius: 20, borderTopRightRadius: 20, height: undefined, width: '100%', aspectRatio: 1/1}} source={ user.userDoc && user.userDoc.photoURL ? { uri: user.userDoc.photoURL } : require("../assets/nj-bunny.png")} />
           <Text
             style={{ textAlign: "center", paddingTop: 20, paddingBottom: 10, fontSize: 22, fontWeight: '600' }}
           >

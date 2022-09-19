@@ -7,6 +7,7 @@ import {
   Image,
   TextInput,
   StyleSheet,
+  TouchableOpacity,
   ImageBackground
 } from "react-native";
 import { pickImage, askForPermission, uploadImage } from "../utils";
@@ -16,7 +17,7 @@ import { doc, setDoc, addDoc } from "@firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 
-export default function Profile() {
+export default function Profile({type}) {
   const [displayName, setDisplayName] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
   const [permissionStatus, setPermissionStatus] = useState(null);
@@ -69,6 +70,9 @@ export default function Profile() {
       <View style={styles.container}>
       <LinearGradient style={styles.container} locations={[0, 0.1, 0.4, 0.94, 0.97, 1]}
     colors={['#3077fc', '#98bbfe', 'white', 'white', '#98bbfe', '#3077fc']}>
+        <TouchableOpacity style={{width:'20%', alignItems: 'center', paddingTop: 60}} onPress={()=>navigation.goBack()}>
+        <Image style={{height: 34, width: 34}} source={require("../assets/back.png")} />
+        </TouchableOpacity>
         <Text style={styles.title}>
         Profile Info 📝
         </Text>
@@ -77,9 +81,7 @@ export default function Profile() {
           onPress={handleProfilePicture}
           underlayColor="none"
         >
-          {!selectedImage ? (
-            <Image source={require("../assets/camera.png")} style={{ width: '30%', height: undefined, aspectRatio: 246/168}}/>
-          ) : (
+          {selectedImage ? (
             <LinearGradient
             style={{width: '100%', height: '100%',borderRadius: 180, justifyContent: 'center'}}
             locations={[0, 0.3]}
@@ -90,11 +92,23 @@ export default function Profile() {
               style={{ width: "90%", height: "90%", borderRadius: 180, alignSelf: 'center' }}
             />
             </LinearGradient>
+          )
+            : auth.currentUser.photoURL ? (
+              <LinearGradient
+            style={{width: '100%', height: '100%',borderRadius: 180, justifyContent: 'center'}}
+            locations={[0, 0.3]}
+            colors={["white", "#92e141"]}
+          >
+            {/* <Text>{auth.currentUser.photoURL}</Text> */}
+            <Image source={{ uri: auth.currentUser.photoURL }} style={{ width: "90%", height: "90%", borderRadius: 180, alignSelf: 'center' }} />
+            </LinearGradient>
+          ) : (
+            <Image source={require("../assets/camera.png")} style={{ width: '30%', height: undefined, aspectRatio: 246/168}}/>
           )}
           
         </TouchableHighlight>
         <TextInput
-          placeholder="Type your name"
+          placeholder=  {auth.currentUser.displayName || "Type your name"}
           value={displayName}
           onChangeText={setDisplayName}
           style={styles.input}
@@ -109,7 +123,7 @@ export default function Profile() {
             locations={[0, 0.3]}
             colors={["white", "#92e141"]}
           >
-            <Text style={styles.buttonText}>Next</Text>
+            <Text style={styles.buttonText}>Save ✔️</Text>
           </LinearGradient>
           </TouchableHighlight>
         </LinearGradient>

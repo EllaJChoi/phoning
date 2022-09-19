@@ -1,9 +1,13 @@
-import { StyleSheet, Text, View, Image, ImageBackground, TouchableOpacity } from 'react-native';
+import { Button, StyleSheet, Text, View, Image, ImageBackground, TouchableOpacity } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import TabBar from '../components/TabBar';
+import { auth } from '../firebase';
+import ListItem from "../components/ListItem";
+import { UserInterfaceIdiom } from 'expo-constants';
 
 export default function Settings() {
+  const { currentUser } = auth;
     const navigation = useNavigation();
 
     return (
@@ -14,6 +18,16 @@ export default function Settings() {
         <Text style={styles.title}>
         Settings
         </Text>
+        {/* <Text style={{marginLeft: 20, fontSize: 20, fontWeight: '600'}}>{currentUser.displayName}</Text> */}
+        <View style={{padding: 10}}>
+          <ListItem
+          style={{}}
+          user={currentUser}
+          type="settings"
+          // image={false}
+        />
+        </View>
+        {/* <Button title="Edit Profile" color="#841584" onPress={() => navigation.navigate("profile")} /> */}
         </View>
         <TabBar/>
         </LinearGradient>

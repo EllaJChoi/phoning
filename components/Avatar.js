@@ -18,18 +18,29 @@ export default function Avatar({ size, user }) {
     //   resizeMode="cover"
     // />
     <LinearGradient
-            style={{width: size, height: size,borderRadius: size, justifyContent: 'center', borderWidth: 1}}
-            locations={[0, 0.3]}
-            colors={["white", "#92e141"]}
-          >
-            <Image
-              source={
-                    user.photoURL
-                      ? { uri: user.photoURL }
-                      : require("../assets/nj-bunny.png")
-                  }
-              style={{ width: "90%", height: "90%", borderRadius: size, alignSelf: 'center' }}
-            />
-            </LinearGradient>
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size,
+        justifyContent: "center",
+        borderWidth: 1,
+      }}
+      locations={[0, 0.3]}
+      colors={["white", "#92e141"]}
+    >
+      <Image
+        source={
+          user.photoURL ? { uri: user.photoURL }
+            : user.userDoc ? { uri: user.userDoc.photoURL }
+            : require("../assets/nj-bunny.png")
+        }
+        style={{
+          width: "90%",
+          height: "90%",
+          borderRadius: size,
+          alignSelf: "center",
+        }}
+      />
+    </LinearGradient>
   );
 }

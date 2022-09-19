@@ -17,7 +17,7 @@ import ListItem from "../components/ListItem";
 import TabBar from "../components/TabBar";
 import { FlatList } from "react-native-gesture-handler";
 import GlobalContext from "../context/Context";
-import { db } from "../firebase";
+import { auth, db } from "../firebase";
 
 export default function Friends() {
   const contacts = useContacts();
@@ -66,6 +66,7 @@ const styles = StyleSheet.create({
 function FriendPreview({ contact, image }) {
   const { unfilteredRooms, rooms } = useContext(GlobalContext);
   const [user, setUser] = useState(contact);
+  const { currentUser } = auth;
 
   useEffect(() => {
     const q = query(
@@ -81,14 +82,19 @@ function FriendPreview({ contact, image }) {
     return () => unsubscribe();
   }, []);
   return (
+    <View>
+    {user.userDoc && user.email !== currentUser.email && (
+      // <Text>JSON.stringify{user.userDoc}</Text>
     <ListItem
       // style={{ marginTop: 7 }}
-      type="contacts"
+      type="friends"
       user={user}
       image={image}
       room={unfilteredRooms.find((room) =>
         room.participantsArray.includes(contact.email)
       )}
     />
+    )}
+    </View>
   );
 }

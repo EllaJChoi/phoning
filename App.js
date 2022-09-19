@@ -63,21 +63,13 @@ function App() {
           <Stack.Screen name='Login' component={Login} />
         </Stack.Navigator>
       ) : (
-        <Stack.Navigator
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: 'green',
-            shadowOpacity: 0,
-            elevation: 0,
-          },
-          headerTintColor: 'white',
-        }}>
+        <Stack.Navigator>
           {!user.displayName && (
-            <Stack.Screen name="profile" component={Profile} options={{ headerShown: false }}
-            />
+            <Stack.Screen name="profile" component={Profile} options={{ headerShown: false }} />
           )}
           <Stack.Screen name="home" component={Home} options={{ headerShown: false, gestureEnabled: false }} />
           <Stack.Screen name="chat" component={Chat} options={{ headerShown: false }} />
+          <Stack.Screen name="profile" component={Profile} options={{ headerShown: false }} />
         </Stack.Navigator>
       )
       }
